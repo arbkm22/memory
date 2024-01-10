@@ -5,18 +5,64 @@ fn main() {
 slint::slint! {
 
     component MemoryTile inherits Rectangle {
+        callback clicked;
+        in property <bool> open_curtain;
+        in property <bool> solved;
+        in property <image> icon;
+
         width: 64px;   
         height: 64px;
-        background: #3960D5;
+        background: solved ? #347e57 : #3960d5;
+        animate background { duration: 800ms; }
 
         Image { 
-            source: @image-url("icons/bus.png");
+            source: icon;
             width: parent.width;
             height: parent.height;
         }
+
+        // Left curtain
+        Rectangle {
+            background: #193076;
+            x: 0px;
+            width: open_curtain ? 0px : (parent.width / 2);
+            height: parent.height;
+            animate width {
+                 duration: 250ms;
+                 easing: ease-in;
+            }
+        }
+
+        // Right curtain
+        Rectangle {
+            background: #193076;
+            x: open-curtain ? parent.width : (parent.width / 2);
+            width: open_curtain ? 0px : (parent.width / 2);
+            height: parent.height;
+            animate width {
+                duration: 250ms;
+                easing: ease-in;
+            }
+            animate x {
+                duration: 250ms;
+                easing: ease-in;
+            }
+        }
+
+        TouchArea {
+            clicked => {
+                root.clicked()
+            }
+        }
+        
     }
 
     export component MainWindow inherits Window {
-        MemoryTile {}
+        MemoryTile {
+            icon: @image-url("icons/bus.png");
+            clicked => {
+                self.open-curtain = !self.open-curtain;
+            }
+        }
     }
 }
